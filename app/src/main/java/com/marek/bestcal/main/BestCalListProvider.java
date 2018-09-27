@@ -63,6 +63,12 @@ public class BestCalListProvider implements RemoteViewsService.RemoteViewsFactor
             remoteViews.setTextColor(R.id.WidgetDayNameOfDay, holidayColor);
             remoteViews.setTextColor(R.id.WidgetDayNameOfMonth, holidayColor);
         }
+        else {
+            remoteViews.setTextColor(R.id.WidgetDayDayOfMonth, Color.BLACK);
+            remoteViews.setTextColor(R.id.WidgetDayNameOfDay, Color.BLACK);
+            remoteViews.setTextColor(R.id.WidgetDayNameOfMonth, Color.BLACK);
+        }
+
         return remoteViews;
     }
 
