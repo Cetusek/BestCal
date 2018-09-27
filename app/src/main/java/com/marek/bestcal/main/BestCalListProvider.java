@@ -3,24 +3,31 @@ package com.marek.bestcal.main;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.marek.bestcal.R;
+import com.marek.bestcal.config.Configuration;
 import com.marek.bestcal.main.model.DayList;
 import com.marek.bestcal.main.model.DayListItem;
-
-import java.util.ArrayList;
 
 public class BestCalListProvider implements RemoteViewsService.RemoteViewsFactory {
 
     private DayList list = new DayList();
     private Context context;
     private int appWidgedId;
+    private int holidayColor;
 
     public BestCalListProvider(Context context, Intent intent) {
         this.context = context;
         appWidgedId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+        setValuesFromConfiguration();
+    }
+
+    private void setValuesFromConfiguration() {
+        Configuration configuration = Configuration.getInstance();
+        holidayColor = configuration.getHolidayColor();
     }
 
 
@@ -48,7 +55,14 @@ public class BestCalListProvider implements RemoteViewsService.RemoteViewsFactor
     public RemoteViews getViewAt(int position) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_day);
         DayListItem item = list.getItem(position);
-        remoteViews.setTextViewText(R.id.WidgetDayNumber, item.text);
+        remoteViews.setTextViewText(R.id.WidgetDayDayOfMonth, item.dayOfMonth);
+        remoteViews.setTextViewText(R.id.WidgetDayNameOfDay, item.dayOfWeek);
+        remoteViews.setTextViewText(R.id.WidgetDayNameOfMonth, item.month);
+        if (item.isHoliday) {
+            remoteViews.setTextColor(R.id.WidgetDayDayOfMonth, holidayColor);
+            remoteViews.setTextColor(R.id.WidgetDayNameOfDay, holidayColor);
+            remoteViews.setTextColor(R.id.WidgetDayNameOfMonth, holidayColor);
+        }
         return remoteViews;
     }
 
