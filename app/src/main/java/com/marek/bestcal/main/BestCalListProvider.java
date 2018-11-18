@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.text.Html;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -14,13 +15,14 @@ import com.marek.bestcal.main.model.DayListItem;
 
 public class BestCalListProvider implements RemoteViewsService.RemoteViewsFactory {
 
-    private DayList list = new DayList();
+    private DayList list; // = new DayList(null);
     private Context context;
     private int appWidgedId;
     private int holidayColor;
 
     public BestCalListProvider(Context context, Intent intent) {
         this.context = context;
+        list = DayList.getInstance(context);
         appWidgedId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         setValuesFromConfiguration();
     }
@@ -68,9 +70,10 @@ public class BestCalListProvider implements RemoteViewsService.RemoteViewsFactor
             remoteViews.setTextColor(R.id.WidgetDayNameOfDay, Color.BLACK);
             remoteViews.setTextColor(R.id.WidgetDayNameOfMonth, Color.BLACK);
         }
-
+        remoteViews.setTextViewText(R.id.WidgetDayDayContent, Html.fromHtml(item.getHTMLDayContent()));
         return remoteViews;
     }
+
 
     @Override
     public RemoteViews getLoadingView() {
@@ -91,4 +94,9 @@ public class BestCalListProvider implements RemoteViewsService.RemoteViewsFactor
     public boolean hasStableIds() {
         return false;
     }
+
+    public void refreshList() {
+
+    }
+
 }

@@ -2,12 +2,15 @@ package com.marek.bestcal.main;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RemoteViews;
 
 import com.marek.bestcal.R;
 
@@ -28,9 +31,21 @@ public class BestCalWidgetConfigureActivity extends Activity {
             String widgetText = mAppWidgetText.getText().toString();
             saveTitlePref(context, mAppWidgetId, widgetText);
 
-            // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            BestCalWidget.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+
+
+            /*
+            RemoteViews views = new RemoteViews(context.getPackageName(),  R.layout.best_cal_widget);
+            appWidgetManager.updateAppWidget(mAppWidgetId, views);
+            appWidgetManager.notifyAppWidgetViewDataChanged(mAppWidgetId, R.layout.best_cal_widget);
+            */
+
+            Intent intent = new Intent(context, BestCalWidget.class);
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            int[] ids = {mAppWidgetId};
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+            sendBroadcast(intent);
+
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
@@ -88,6 +103,7 @@ public class BestCalWidgetConfigureActivity extends Activity {
             mAppWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         }
+
 
         // If this activity was started with an intent without an app widget ID, finish with an error.
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {

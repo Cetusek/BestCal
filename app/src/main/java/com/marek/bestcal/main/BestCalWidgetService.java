@@ -9,7 +9,6 @@ public class BestCalWidgetService extends RemoteViewsService{
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        Log.i("MY_APP", "BestCalWidgetService.RemoteViewsFactory");
         return new BestCalListProvider(this.getApplicationContext(), intent);
     }
 }

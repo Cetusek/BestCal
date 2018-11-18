@@ -3,43 +3,36 @@ package com.marek.bestcal.main;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import com.marek.bestcal.R;
 import com.marek.bestcal.config.calendarlist.CalendarListActivity;
-import com.marek.bestcal.repository.Repo;
+import com.marek.bestcal.main.model.DayList;
 
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link BestCalWidgetConfigureActivity BestCalWidgetConfigureActivity}
  */
-public class BestCalWidget extends AppWidgetProvider {
+public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Callback{
 
-    private static String BUTTON_ACTION = "ButtonAction";
+    private static String REFRESH_BUTTON_ACTION = "RefreshButtonAction";
     private Context context;
-
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.best_cal_widget);
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
-
+    private BestCalThread bestCallThread;
 
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
             RemoteViews remoteViews = updateWidgetListView(context, appWidgetId);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-            //updateAppWidget(context, appWidgetManager, appWidgetId);
         }
+        bestCallThread = BestCalThread.getInstance(this);
+        bestCallThread.start();
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
@@ -49,29 +42,47 @@ public class BestCalWidget extends AppWidgetProvider {
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         remoteViews.setRemoteAdapter(appWidgetId, R.id.WidgetListView, intent);
-        mapButton(context, remoteViews);
+        mapSettingsButton(context, remoteViews);
+        mapRefreshButton(context, remoteViews);
+        mapMonthCalendarButton(context, remoteViews);
         return remoteViews;
     }
 
+    private void mapMonthCalendarButton(Context context, RemoteViews remoteViews) {
+        remoteViews.setInt(R.id.WidgetButtonMonth, "setImageResource", R.drawable.month_calendar);
+    }
 
-    private void mapButton(Context context, RemoteViews remoteViews) {
+
+    private void mapSettingsButton(Context context, RemoteViews remoteViews) {
+        remoteViews.setInt(R.id.WidgetButtonSettings, "setImageResource", R.drawable.settings);
         Intent intent = new Intent(context, CalendarListActivity.class);
-        intent.setAction(BUTTON_ACTION);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        remoteViews.setOnClickPendingIntent(R.id.WidgetButton, pendingIntent);
+        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonSettings, pendingIntent);
     }
 
-    private void mapButton2(Context context, RemoteViews remoteViews) {
+    private void mapRefreshButton(Context context, RemoteViews remoteViews) {
+        remoteViews.setInt(R.id.WidgetButtonRefresh, "setImageResource", R.drawable.refresh_120x120);
         Intent intent = new Intent(context, getClass());
-        intent.setAction(BUTTON_ACTION);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        remoteViews.setOnClickPendingIntent(R.id.WidgetButton, pendingIntent);
+        intent.setAction(REFRESH_BUTTON_ACTION);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonRefresh, pendingIntent);
     }
 
-    private void onButtonPressed() {
-        Intent intent = new Intent(context, CalendarListActivity.class);
 
+    private void onRefreshButtonPressed() {
+        DayList d = DayList.getInstance(context);
+        d.refreshList();
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass()));
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.WidgetListView);
+        /*
+        Intent intent = new Intent();
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+        context.sendBroadcast(intent);
+        */
     }
+
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
@@ -84,20 +95,29 @@ public class BestCalWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
+        Log.i("MY_APP", "onEnabled");
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+
+
+
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context = context;
-        if (intent.getAction().equals(BUTTON_ACTION)) {
-            onButtonPressed();
+        if (intent.getAction().equals(REFRESH_BUTTON_ACTION)) {
+            onRefreshButtonPressed();
         }
         super.onReceive(context, intent);
+    }
+
+    @Override
+    public void threadTask() {
+        onRefreshButtonPressed();
     }
 }
 
