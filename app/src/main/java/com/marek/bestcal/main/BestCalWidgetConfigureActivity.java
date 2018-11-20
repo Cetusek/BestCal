@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.marek.bestcal.R;
 
@@ -26,12 +27,13 @@ public class BestCalWidgetConfigureActivity extends Activity {
     View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = BestCalWidgetConfigureActivity.this;
+            try {
 
-            // When the button is clicked, store the string locally
-            String widgetText = mAppWidgetText.getText().toString();
-            saveTitlePref(context, mAppWidgetId, widgetText);
+                // When the button is clicked, store the string locally
+                String widgetText = mAppWidgetText.getText().toString();
+                saveTitlePref(context, mAppWidgetId, widgetText);
 
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
 
             /*
@@ -40,18 +42,24 @@ public class BestCalWidgetConfigureActivity extends Activity {
             appWidgetManager.notifyAppWidgetViewDataChanged(mAppWidgetId, R.layout.best_cal_widget);
             */
 
-            Intent intent = new Intent(context, BestCalWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            int[] ids = {mAppWidgetId};
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-            sendBroadcast(intent);
+                Intent intent = new Intent(context, BestCalWidget.class);
+                intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                int[] ids = {mAppWidgetId};
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+                sendBroadcast(intent);
 
 
-            // Make sure we pass back the original appWidgetId
-            Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-            setResult(RESULT_OK, resultValue);
-            finish();
+                // Make sure we pass back the original appWidgetId
+                Intent resultValue = new Intent();
+                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                setResult(RESULT_OK, resultValue);
+                Toast.makeText(context, "mOnClickListener: OK", Toast.LENGTH_LONG).show();
+                finish();
+
+            }
+            catch (Exception e) {
+                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
         }
     };
 

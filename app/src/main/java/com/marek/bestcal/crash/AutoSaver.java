@@ -45,13 +45,13 @@ public class AutoSaver {
 
 
     public void saveCrash(String text) {
-        prefix = "StepWatcher_crash_";
+        prefix = "BestCal_crash_";
         saveToFile(text, generateFileName());
     }
 
 
     public void saveInfo(String text) {
-        prefix = "StepWatcher_info_";
+        prefix = "BestCal_info_";
         saveToFile(text, generateFileName());
     }
 
@@ -67,7 +67,7 @@ public class AutoSaver {
             stringBuffer.append(element.toString());
             stringBuffer.append("\n");
         }
-        prefix = "StepWatcher_call_stack_";
+        prefix = "BestCal_call_stack_";
         saveToFile(stringBuffer.toString(), generateFileName());
     }
 

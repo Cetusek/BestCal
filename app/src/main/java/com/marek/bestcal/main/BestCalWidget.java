@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.marek.bestcal.R;
 import com.marek.bestcal.config.calendarlist.CalendarListActivity;
+import com.marek.bestcal.crash.CustomExceptionHandler;
 import com.marek.bestcal.main.model.DayList;
 
 /**
@@ -28,6 +29,7 @@ public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Ca
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        CustomExceptionHandler.assignHandler(context);
         for (int appWidgetId : appWidgetIds) {
             RemoteViews remoteViews = updateWidgetListView(context, appWidgetId);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
@@ -72,9 +74,9 @@ public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Ca
 
     private void onRefreshButtonPressed() {
 
-
         DayList d = DayList.getInstance(context);
         d.refreshList();
+        Toast.makeText(context, "Events: "+d.getEventsTotal(), Toast.LENGTH_LONG).show();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass()));
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.WidgetListView);

@@ -19,6 +19,7 @@ public class DayList {
 
     private ArrayList<DayListItem> list;
     private Context context;
+    private int eventsTotal;
 
     public static DayList getInstance(Context context) {
         if (instance == null) {
@@ -68,6 +69,7 @@ public class DayList {
                 UsersEvent event = events.get(i);
                 if (day.date.equals(event.getDate())) {
                     day.addEvent(event);
+                    eventsTotal++;
                     lastAddedEventPos = i;
                     eventsLeftToAttach--;
                     if (eventsLeftToAttach == 0) {
@@ -92,8 +94,17 @@ public class DayList {
         return list.get(position);
     }
 
-    public void refreshList() {
+    private void clearAllBeforeRefresh() {
         list.clear();
+        eventsTotal = 0;
+    }
+
+    public int getEventsTotal() {
+        return eventsTotal;
+    }
+
+    public void refreshList() {
+        clearAllBeforeRefresh();
         populateList();
     }
 
