@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.marek.bestcal.R;
 import com.marek.bestcal.config.calendarlist.CalendarListActivity;
@@ -70,11 +71,23 @@ public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Ca
 
 
     private void onRefreshButtonPressed() {
+
+
         DayList d = DayList.getInstance(context);
         d.refreshList();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass()));
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.WidgetListView);
+
+        /*
+
+        Intent intent = new Intent(context, BestCalWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+        context.sendBroadcast(intent);
+
+        */
+
         /*
         Intent intent = new Intent();
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
