@@ -1,5 +1,6 @@
 package com.marek.bestcal.main;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -14,17 +15,15 @@ import android.widget.Toast;
 import com.marek.bestcal.R;
 import com.marek.bestcal.config.calendarlist.CalendarListActivity;
 import com.marek.bestcal.crash.CustomExceptionHandler;
+import com.marek.bestcal.main.model.BestCalUpdater;
 import com.marek.bestcal.main.model.DayList;
 
-/**
- * Implementation of App Widget functionality.
- * App Widget Configuration implemented in {@link BestCalWidgetConfigureActivity BestCalWidgetConfigureActivity}
- */
-public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Callback{
+public class BestCalWidget extends AppWidgetProvider {
 
+    public static String REFRESH_FROM_TIMER = "RefreshFromTimer";
     private static String REFRESH_BUTTON_ACTION = "RefreshButtonAction";
     private Context context;
-    private BestCalThread bestCallThread;
+    //private BestCalThread bestCallThread;
 
 
     @Override
@@ -34,9 +33,21 @@ public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Ca
             RemoteViews remoteViews = updateWidgetListView(context, appWidgetId);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
+        /*
         bestCallThread = BestCalThread.getInstance(this);
         bestCallThread.start();
+        */
         super.onUpdate(context, appWidgetManager, appWidgetIds);
+    }
+
+    private void setUpdater(Context context) {
+        BestCalUpdater bestCalUpdater = new BestCalUpdater();
+        bestCalUpdater.registerAlarm(context);
+    }
+
+    private void unsetUpdater(Context context) {
+        BestCalUpdater bestCalUpdater = new BestCalUpdater();
+        bestCalUpdater.unregisterAlarm(context);
     }
 
     private RemoteViews updateWidgetListView(Context context, int appWidgetId) {
@@ -110,15 +121,15 @@ public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Ca
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
+        setUpdater(context);
         Log.i("MY_APP", "onEnabled");
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
-
-
-
+        unsetUpdater(context);
+        Log.i("MY_APP", "onDisabled");
     }
 
     @Override
@@ -127,12 +138,12 @@ public class BestCalWidget extends AppWidgetProvider implements BestCalThread.Ca
         if (intent.getAction().equals(REFRESH_BUTTON_ACTION)) {
             onRefreshButtonPressed();
         }
+        if (intent.getAction().equals(REFRESH_FROM_TIMER)) {
+            Log.i("MY_APP", "From timer");
+            setUpdater(context);
+        }
         super.onReceive(context, intent);
     }
 
-    @Override
-    public void threadTask() {
-        onRefreshButtonPressed();
-    }
 }
 

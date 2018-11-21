@@ -53,7 +53,6 @@ public class BestCalWidgetConfigureActivity extends Activity {
                 Intent resultValue = new Intent();
                 resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
                 setResult(RESULT_OK, resultValue);
-                Toast.makeText(context, "mOnClickListener: OK", Toast.LENGTH_LONG).show();
                 finish();
 
             }
