@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -33,10 +34,6 @@ public class BestCalWidget extends AppWidgetProvider {
             RemoteViews remoteViews = updateWidgetListView(context, appWidgetId);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
-        /*
-        bestCallThread = BestCalThread.getInstance(this);
-        bestCallThread.start();
-        */
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
@@ -83,15 +80,17 @@ public class BestCalWidget extends AppWidgetProvider {
     }
 
 
-    private void onRefreshButtonPressed() {
-
+    private  void refreshList() {
         DayList d = DayList.getInstance(context);
         d.refreshList();
         Toast.makeText(context, "Events: "+d.getEventsTotal(), Toast.LENGTH_LONG).show();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass()));
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.WidgetListView);
+    }
 
+    private void onRefreshButtonPressed() {
+        refreshList();
         /*
 
         Intent intent = new Intent(context, BestCalWidget.class);
@@ -122,14 +121,21 @@ public class BestCalWidget extends AppWidgetProvider {
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
         setUpdater(context);
-        Log.i("MY_APP", "onEnabled");
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
         unsetUpdater(context);
-        Log.i("MY_APP", "onDisabled");
+    }
+
+    private void refreshFromTimer(Context context) {
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
+        wakeLock.acquire();
+        refreshList();
+        setUpdater(context);
+        wakeLock.release();
     }
 
     @Override
@@ -139,8 +145,7 @@ public class BestCalWidget extends AppWidgetProvider {
             onRefreshButtonPressed();
         }
         if (intent.getAction().equals(REFRESH_FROM_TIMER)) {
-            Log.i("MY_APP", "From timer");
-            setUpdater(context);
+            refreshFromTimer(context);
         }
         super.onReceive(context, intent);
     }

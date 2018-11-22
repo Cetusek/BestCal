@@ -16,16 +16,16 @@ public class DayListItem {
     public String month;
     public Boolean isHoliday = false;
 
-    private ArrayList<UsersEvent> events;
+    private ArrayList<DayListItemEvent> events;
 
-    public void addEvent(UsersEvent event) {
+    public void addEvent(DayListItemEvent event) {
         if (events == null) {
             events = new ArrayList<>();
         }
         events.add(event);
     }
 
-    private ArrayList<UsersEvent> getEvents() {
+    private ArrayList<DayListItemEvent> getEvents() {
         return events;
     }
 
@@ -34,7 +34,7 @@ public class DayListItem {
         if (events != null) {
             int eventsTotalNo = events.size();
             for (int i = 0; i < eventsTotalNo; i++) {
-                sb.append(events.get(i).getHTML());
+                sb.append(events.get(i).getEventLabel());
                 if (i < eventsTotalNo - 1) {
                     sb.append("<BR>");
                 }

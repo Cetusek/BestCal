@@ -2,7 +2,6 @@ package com.marek.bestcal.main.model;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import com.marek.bestcal.repository.Repo;
 import com.marek.bestcal.repository.calendar.UsersEvent;
@@ -44,8 +43,8 @@ public class DayList {
             DayListItem item = new DayListItem();
             item.date = calendar.getTime();
             item.dayOfMonth = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-            item.dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
-            item.month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+            item.dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()).substring(0, 3);
+            item.month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()).substring(0 ,3);
             if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
                 item.isHoliday = true;
             }
@@ -58,7 +57,7 @@ public class DayList {
     private void attachEvents() {
         Date dateFrom = list.get(0).date;
         Date dateTo = list.get(list.size()-1).date;
-        List<UsersEvent> events = readEvents(dateFrom, dateTo);
+        List<DayListItemEvent> events = readEvents(dateFrom, dateTo);
         int eventsLeftToAttach = events.size();
         int lastAddedEventPos = 0;
         if (eventsLeftToAttach == 0) {
@@ -66,8 +65,8 @@ public class DayList {
         }
         for (DayListItem day : list) {
             for (int i = lastAddedEventPos; i < events.size(); i++) {
-                UsersEvent event = events.get(i);
-                if (day.date.equals(event.getDate())) {
+                DayListItemEvent event = events.get(i);
+                if (day.date.equals(event.getEventDate())) {
                     day.addEvent(event);
                     eventsTotal++;
                     lastAddedEventPos = i;
@@ -81,9 +80,19 @@ public class DayList {
 
     }
 
-    private List<UsersEvent> readEvents(Date dateFrom, Date dateTo) {
+    private List<UsersEvent> readEventsFromRepo(Date dateFrom, Date dateTo) {
         Repo repo = new Repo();
         return repo.getEvents(context, dateFrom, dateTo);
+    }
+
+
+    private List<DayListItemEvent> readEvents(Date dateFrom, Date dateTo) {
+        List<UsersEvent> repoEventsList = readEventsFromRepo(dateFrom, dateTo);
+        List<DayListItemEvent> eventList = new ArrayList<>();
+        for (UsersEvent repoEvent : repoEventsList) {
+            eventList.addAll(repoEvent.toDayListItemEvents());
+        }
+        return eventList;
     }
 
     public int size() {

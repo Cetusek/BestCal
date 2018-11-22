@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.marek.bestcal.main.BestCalWidget;
 
 import java.io.Serializable;
+import java.util.Calendar;
 
 public class BestCalUpdater {
 
@@ -20,41 +21,32 @@ public class BestCalUpdater {
     public BestCalUpdater() {
     }
 
-
-    /*
-    @Override
-    public void onReceive(Context context, Intent intent) {
-
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
-        wl.acquire();
-
-        // Put here YOUR code.
-        Log.i("MY_APP", "Alarm is fired");
-
-
-        updateIsRequested();
-        setExact(context);
-
-        wl.release();
-
+    private long getMillisecondsToMidnight() {
+        Calendar currentTime = Calendar.getInstance();
+        Calendar destTime = Calendar.getInstance();
+        destTime.add(Calendar.DATE, 1);
+        destTime.set(Calendar.HOUR_OF_DAY, 0);
+        destTime.set(Calendar.MINUTE, 0);
+        destTime.set(Calendar.SECOND, 1);
+        destTime.set(Calendar.MILLISECOND, 0);
+        return destTime.getTimeInMillis();
     }
-    */
-
 
     public void registerAlarm(Context context) {
-        AlarmManager alarmManager = ( AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(context, BestCalWidget.class);
-        i.setAction(BestCalWidget.REFRESH_FROM_TIMER);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+ (1000 * 5), pendingIntent); // Millisec * Second * Minute
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, getMillisecondsToMidnight(), getPendingIntent(context));
     }
 
     public void unregisterAlarm(Context context) {
-        AlarmManager alarmManager = ( AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(getPendingIntent(context));
+    }
+
+    private PendingIntent getPendingIntent(Context context) {
         Intent i = new Intent(context, BestCalWidget.class);
+        i.setAction(BestCalWidget.REFRESH_FROM_TIMER);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
-        alarmManager.cancel(pendingIntent);
+        return pendingIntent;
     }
 
 }

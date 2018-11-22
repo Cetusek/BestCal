@@ -4,61 +4,63 @@ package com.marek.bestcal.repository.calendar;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.text.ParseException;
+import com.marek.bestcal.main.model.DayListItemEvent;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class UsersEvent implements Comparable{
 
     private String title;
-    private Date date;
-    private Date dateAndTime;
-    private int allDay;
+    private Date dateFrom;
+    private Date dateAndTimeFrom;
+    private Date dateAndTimeTo;
+    private int isAllDay;
 
-    public UsersEvent(String title, Date dateAndTime, int allDay) {
+    public UsersEvent(String title, Date dateAndTimeFrom, int isAllDay, Date dateAndTimeTo) {
         this.title = title;
-        this.dateAndTime = dateAndTime;
-        this.allDay = allDay;
-        setDate();
+        this.dateAndTimeFrom = dateAndTimeFrom;
+        this.dateAndTimeTo = dateAndTimeTo;
+        this.isAllDay = isAllDay;
+        dateFrom = truncateDate(dateAndTimeFrom);
     }
 
 
     private void setDate() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateAndTime);
+        calendar.setTime(dateAndTimeFrom);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        date = calendar.getTime();
+        dateFrom = calendar.getTime();
     }
 
     @Override
     public String toString() {
         return "UsersEvent{" +
                 "title='" + title + '\'' +
-                ", date=" + date + '\'' +
-                ", dateAndTime=" + dateAndTime +
+                ", dateFrom=" + dateFrom + '\'' +
+                ", dateAndTime=" + dateAndTimeFrom +'\'' +
+                ", dateAndTo=" + dateAndTimeTo +
                 '}';
     }
 
-    public Date getDate() {
-        return date;
+    public Date getDateFrom() {
+        return dateFrom;
     }
 
-    private String getHHMM() {
+    private String getHHMM(Date date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-        //simpleDateFormat.setTimeZone(TimeZone.getDefault());
-        return simpleDateFormat.format(dateAndTime);
+        return simpleDateFormat.format(date);
     }
 
-    public String getHTML() {
+    private String getHTML() {
         String result = "";
-        if (allDay == 0) {
-            result = getHHMM() + " ";
+        if (isAllDay == 0) {
+            result = getHHMM(dateAndTimeFrom) + " ";
         }
         result += title;
         return result;
@@ -67,6 +69,57 @@ public class UsersEvent implements Comparable{
     @Override
     public int compareTo(@NonNull Object another) {
         UsersEvent u = (UsersEvent) another;
-        return dateAndTime.compareTo(u.dateAndTime);
+        return dateAndTimeFrom.compareTo(u.dateAndTimeFrom);
+    }
+
+    public int getIsAllDay() {
+        return isAllDay;
+    }
+
+    private Date truncateDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    private Date nextDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, 1);
+        return calendar.getTime();
+    }
+
+    private Date prevDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, -1);
+        return calendar.getTime();
+    }
+
+
+    public ArrayList<DayListItemEvent> toDayListItemEvents() {
+        ArrayList<DayListItemEvent> list = new ArrayList<>();
+        String eventLabel = getHTML();
+        if (isAllDay == 0) {
+            list.add(new DayListItemEvent(dateFrom, eventLabel));
+        }
+        else {
+            Date eventPeriodCurrentDate = (Date) dateFrom.clone();
+            Date eventPeriodLastDate = prevDate(truncateDate(dateAndTimeTo)); //Dla calodniowych zdarzen data konca jest przesunieta od 24 od daty poczatkowej
+            while (true) {
+                list.add(new DayListItemEvent(eventPeriodCurrentDate, eventLabel));
+                if (eventPeriodCurrentDate.compareTo(eventPeriodLastDate) >= 0) {
+                    break;
+                }
+                else {
+                    eventPeriodCurrentDate = nextDate(eventPeriodCurrentDate);
+                }
+            }
+        }
+        return list;
     }
 }

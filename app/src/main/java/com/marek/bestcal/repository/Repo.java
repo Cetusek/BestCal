@@ -65,15 +65,18 @@ public class Repo {
         String[] selectionArgs = new String[]{Long.toString(dateFrom.getTime()), Long.toString(dateTo.getTime())};
         String[] eventProjection =
                 {
+                        CalendarContract.Events._ID,
                         CalendarContract.Events.TITLE,
                         CalendarContract.Events.DTSTART,
-                        CalendarContract.Events.ALL_DAY
+                        CalendarContract.Events.ALL_DAY,
+                        CalendarContract.Events.DTEND
                 };
         Cursor cursor = contentResolver.query(uri, eventProjection, selection, selectionArgs, null);
         while (cursor.moveToNext()) {
             UsersEvent usersEvent = new UsersEvent(cursor.getString(cursor.getColumnIndex(CalendarContract.Events.TITLE)),
-                                                   new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART))),
-                                                   cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.ALL_DAY))
+                    new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART))),
+                    cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.ALL_DAY)),
+                    new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND)))
                     );
             list.add(usersEvent);
             Collections.sort(list);
