@@ -18,6 +18,7 @@ import com.marek.bestcal.config.calendarlist.CalendarListActivity;
 import com.marek.bestcal.crash.CustomExceptionHandler;
 import com.marek.bestcal.main.model.BestCalUpdater;
 import com.marek.bestcal.main.model.DayList;
+import com.marek.bestcal.month.MonthActivity;
 
 public class BestCalWidget extends AppWidgetProvider {
 
@@ -61,6 +62,15 @@ public class BestCalWidget extends AppWidgetProvider {
 
     private void mapMonthCalendarButton(Context context, RemoteViews remoteViews) {
         remoteViews.setInt(R.id.WidgetButtonMonth, "setImageResource", R.drawable.month_calendar);
+        Intent intent = new Intent(context, MonthActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonMonth, pendingIntent);
+        /*
+        Intent intent = new Intent(context, getClass());
+        intent.setAction(MONTH_BUTTON_ACTION);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonMonth, pendingIntent);
+        */
     }
 
 
@@ -78,7 +88,6 @@ public class BestCalWidget extends AppWidgetProvider {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.WidgetButtonRefresh, pendingIntent);
     }
-
 
     private  void refreshList() {
         DayList d = DayList.getInstance(context);
