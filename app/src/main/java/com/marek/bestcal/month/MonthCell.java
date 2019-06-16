@@ -12,8 +12,7 @@ import android.widget.TextView;
 
 import com.marek.bestcal.R;
 
-import org.w3c.dom.Text;
-
+import java.util.ArrayList;
 import java.util.Date;
 
 
@@ -25,15 +24,18 @@ public class MonthCell extends LinearLayout {
     private final int TODAY_BACKGROUND_COLOR = Color.GREEN;
 
 
-    TextView textViewDayNo;
-    LinearLayout content;
-    Date cellDate;
+    private TextView textViewDayNo;
+    private LinearLayout content;
+    private Date cellDate;
 
-    int defaultBackgroundColor;
+    private int defaultBackgroundColor;
+
+    private ArrayList<TextView> events;
 
 
     public MonthCell(Context context) {
         super(context);
+        events = new ArrayList<>();
         inflate();
         mapGUI();
     }
@@ -41,6 +43,7 @@ public class MonthCell extends LinearLayout {
     private void inflate() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         content = (LinearLayout) inflater.inflate(R.layout.month_cell, this);
+        content = (LinearLayout) content.findViewById(R.id.MonthCellContent);
     }
 
     private void mapGUI() {
@@ -80,7 +83,25 @@ public class MonthCell extends LinearLayout {
         TextView event = new TextView(getContext());
         event.setText(eventName);
         event.setTextColor(Color.BLACK);
-        LinearLayout l = (LinearLayout) content.findViewById(R.id.MonthCellContent);
-        l.addView(event);
+        event.setMaxLines(1);
+        event.setTextSize(10);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);;
+        params.setMarginStart(2);
+        event.setLayoutParams(params);
+
+        content.addView(event);
+        events.add(event);
+    }
+
+
+    public void clearEvents()  {
+        for (int i = 0; i < events.size(); i++) {
+            content.removeView(events.get(i));
+        }
+        events.clear();
+    }
+
+    public Date getCellDate() {
+        return cellDate;
     }
 }

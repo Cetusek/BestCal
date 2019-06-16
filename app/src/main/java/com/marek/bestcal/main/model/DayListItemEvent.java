@@ -1,9 +1,11 @@
 package com.marek.bestcal.main.model;
 
 
+import android.support.annotation.NonNull;
+
 import java.util.Date;
 
-public class DayListItemEvent {
+public class DayListItemEvent implements Comparable<DayListItemEvent> {
 
     private Date eventDate;
     private String eventLabel;
@@ -19,5 +21,11 @@ public class DayListItemEvent {
 
     public String getEventLabel() {
         return eventLabel;
+    }
+
+
+    @Override
+    public int compareTo(@NonNull DayListItemEvent another) {
+        return eventDate.compareTo(another.getEventDate());
     }
 }

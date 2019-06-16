@@ -14,6 +14,7 @@ import android.util.Log;
 import com.marek.bestcal.repository.calendar.UsersCalendar;
 import com.marek.bestcal.repository.calendar.UsersEvent;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -61,7 +62,7 @@ public class Repo {
         }
         ContentResolver contentResolver = context.getContentResolver();
         Uri uri = CalendarContract.Events.CONTENT_URI;
-        String selection = CalendarContract.Events.DTSTART + " >= ? AND " + CalendarContract.Events.DTEND + " <= ? ";
+        String selection = CalendarContract.Events.DTSTART + " >= ? OR " + CalendarContract.Events.DTEND + " <= ? ";
         String[] selectionArgs = new String[]{Long.toString(dateFrom.getTime()), Long.toString(dateTo.getTime())};
         String[] eventProjection =
                 {
@@ -79,6 +80,14 @@ public class Repo {
                     new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND)))
                     );
             list.add(usersEvent);
+
+            /*
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            Log.i("MY_APP", "usersEvent = "+cursor.getString(cursor.getColumnIndex(CalendarContract.Events.TITLE))+" "+
+            sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART)))) + " "+
+            sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND  ))))
+            );
+            */
             Collections.sort(list);
         }
         return list;

@@ -2,13 +2,16 @@ package com.marek.bestcal.main.model;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import com.marek.bestcal.month.MonthCell;
 import com.marek.bestcal.repository.Repo;
 import com.marek.bestcal.repository.calendar.UsersEvent;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +59,9 @@ public class DayList {
     }
 
     private void attachEvents() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        int dateDayItem;
+        int dateEventItem;
         Date dateFrom = list.get(0).date;
         Date dateTo = list.get(list.size()-1).date;
         List<DayListItemEvent> events = readEvents(dateFrom, dateTo);
@@ -65,15 +71,26 @@ public class DayList {
             return;
         }
         for (DayListItem day : list) {
+            dateDayItem = Integer.parseInt(sdf.format(day.date));
             for (int i = lastAddedEventPos; i < events.size(); i++) {
                 DayListItemEvent event = events.get(i);
-                if (day.date.equals(event.getEventDate())) {
+                dateEventItem = Integer.parseInt(sdf.format(event.getEventDate()));
+                //Log.i("MY_APP", dateDayItem+" "+dateEventItem+" "+event.getEventLabel());
+                if (dateDayItem == dateEventItem) {
+                    //Log.i("MY_APP", "++++");
                     day.addEvent(event);
                     eventsTotal++;
                     lastAddedEventPos = i;
                     eventsLeftToAttach--;
                     if (eventsLeftToAttach == 0) {
+                        //Log.i("MY_APP", "return");
                         return;
+                    }
+                }
+                else {
+                    if (dateDayItem < dateEventItem) {
+                       // Log.i("MY_APP", "break");
+                        break;
                     }
                 }
             }
@@ -93,6 +110,13 @@ public class DayList {
         for (UsersEvent repoEvent : repoEventsList) {
             eventList.addAll(repoEvent.toDayListItemEvents());
         }
+        Collections.sort(eventList);
+        /*
+        Log.i("MY_APP", "After sort");
+        for (DayListItemEvent item : eventList) {
+            Log.i("MY_APP", item.getEventDate()+" "+item.getEventLabel());
+        }
+        */
         return eventList;
     }
 

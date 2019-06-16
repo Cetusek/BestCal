@@ -103,19 +103,24 @@ public class UsersEvent implements Comparable{
 
     public ArrayList<DayListItemEvent> toDayListItemEvents() {
         ArrayList<DayListItemEvent> list = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String eventLabel = getHTML();
         if (isAllDay == 0) {
             list.add(new DayListItemEvent(dateFrom, eventLabel));
+            //Log.i("MY_APP", "++++ not all day"+sdf.format(dateFrom)+" - "+eventLabel);
         }
         else {
             Date eventPeriodCurrentDate = (Date) dateFrom.clone();
-            Date eventPeriodLastDate = prevDate(truncateDate(dateAndTimeTo)); //Dla calodniowych zdarzen data konca jest przesunieta od 24 od daty poczatkowej
+            //Date eventPeriodLastDate = prevDate(truncateDate(dateAndTimeTo)); //Dla calodniowych zdarzen data konca jest przesunieta od 24 od daty poczatkowej
+            Date eventPeriodLastDate = prevDate(dateAndTimeTo); //Dla calodniowych zdarzen data konca jest przesunieta od 24 od daty poczatkowej
+            //Log.i("MY_APP", "eventLabel = "+eventLabel+" "+sdf.format(dateFrom)+" - "+sdf.format(eventPeriodLastDate));
             while (true) {
-                list.add(new DayListItemEvent(eventPeriodCurrentDate, eventLabel));
-                if (eventPeriodCurrentDate.compareTo(eventPeriodLastDate) >= 0) {
+                if (Integer.parseInt(sdf.format(eventPeriodCurrentDate)) > Integer.parseInt(sdf.format(eventPeriodLastDate))) {//(eventPeriodCurrentDate.compareTo(eventPeriodLastDate) >= 0) {
                     break;
                 }
                 else {
+                    //Log.i("MY_APP", "++++ "+sdf.format(eventPeriodCurrentDate)+" - "+eventLabel);
+                    list.add(new DayListItemEvent(eventPeriodCurrentDate, eventLabel));
                     eventPeriodCurrentDate = nextDate(eventPeriodCurrentDate);
                 }
             }

@@ -2,15 +2,24 @@ package com.marek.bestcal.month;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
 import com.marek.bestcal.R;
+import com.marek.bestcal.main.model.DayListItem;
+import com.marek.bestcal.main.model.DayListItemEvent;
+import com.marek.bestcal.repository.Repo;
+import com.marek.bestcal.repository.calendar.UsersEvent;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MonthActivity extends AppCompatActivity {
@@ -94,7 +103,8 @@ public class MonthActivity extends AppCompatActivity {
         int currentYear = calendar.get(Calendar.YEAR);
         int currentMonth = calendar.get(Calendar.MONTH);
         int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-        calendar.set(displayedYear, displayedMonth, 1);
+        calendar.set(displayedYear, displayedMonth, 1, 0, 0, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
             offset = 12;
         }
@@ -109,11 +119,16 @@ public class MonthActivity extends AppCompatActivity {
                     calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY,
                     calendar.get(Calendar.YEAR) == currentYear && calendar.get(Calendar.MONTH) == currentMonth && calendar.get(Calendar.DAY_OF_MONTH) == currentDay);
             calendar.add(Calendar.DAY_OF_YEAR, 1);
-            if (i == 13) {
-                cells[i].addEvent("test");
-            }
         }
+        clearEventsInCells();
+        attachEventsToMonthCells();
         refreshMonthLabel();
+    }
+
+    private void clearEventsInCells() {
+        for (int i = 0; i < cells.length; i++) {
+            cells[i].clearEvents();
+        }
     }
 
     @Override
@@ -167,5 +182,44 @@ public class MonthActivity extends AppCompatActivity {
         monthLabel.setText(calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())+", "+ displayedYear);
     }
 
+    private void attachEventsToMonthCells() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        int dateCellItem;
+        int dateEventItem;
+        Date dateFrom = cells[0].getCellDate();
+        Date dateTo = cells[cells.length-1].getCellDate();
+        Repo repo = new Repo();
+        List<UsersEvent> events = repo.getEvents(this, dateFrom, dateTo);
+        List<DayListItemEvent> eventList = new ArrayList<>();
+        for (UsersEvent repoEvent : events) {
+            eventList.addAll(repoEvent.toDayListItemEvents());
+        }
+        Collections.sort(eventList);
+        int eventsLeftToAttach = eventList.size();
+        int lastAddedEventPos = 0;
+        if (eventsLeftToAttach == 0) {
+            return;
+        }
+        for (int i = 0; i < cells.length; i++) {
+            dateCellItem = Integer.parseInt(sdf.format(cells[i].getCellDate()));
+            for (int j = lastAddedEventPos; j < eventList.size(); j++) {
+                DayListItemEvent event = eventList.get(j);
+                dateEventItem = Integer.parseInt(sdf.format(event.getEventDate()));
+                if (dateCellItem == dateEventItem) {
+                    cells[i].addEvent(event.getEventLabel());
+                    lastAddedEventPos = j;
+                    eventsLeftToAttach--;
+                    if (eventsLeftToAttach == 0) {
+                        return;
+                    }
+                }
+                else {
+                    if (dateCellItem < dateEventItem) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
 }
