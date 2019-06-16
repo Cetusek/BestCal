@@ -3,6 +3,7 @@ package com.marek.bestcal.main.model;
 
 import android.content.Context;
 
+import com.marek.bestcal.month.MonthCell;
 import com.marek.bestcal.repository.Repo;
 import com.marek.bestcal.repository.calendar.UsersEvent;
 
@@ -77,8 +78,8 @@ public class DayList {
                 }
             }
         }
-
     }
+
 
     private List<UsersEvent> readEventsFromRepo(Date dateFrom, Date dateTo) {
         Repo repo = new Repo();
