@@ -56,14 +56,17 @@ public class Repo {
     }
 
     public List<UsersEvent> getEvents(Context context, Date dateFrom, Date dateTo) {
+        //Log.i("MY_APP", dateFrom.toString()+"  "+dateTo.toString());
         ArrayList<UsersEvent> list = new ArrayList<>();
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             return list;
         }
         ContentResolver contentResolver = context.getContentResolver();
         Uri uri = CalendarContract.Events.CONTENT_URI;
-        String selection = CalendarContract.Events.DTSTART + " >= ? OR " + CalendarContract.Events.DTEND + " <= ? ";
-        String[] selectionArgs = new String[]{Long.toString(dateFrom.getTime()), Long.toString(dateTo.getTime())};
+        //String selection = CalendarContract.Events.DTSTART + " >= ? OR " + CalendarContract.Events.DTEND + " <= ? ";
+        String selection = CalendarContract.Events.DTSTART + " <= ? AND " + CalendarContract.Events.DTEND + " >= ?";
+        //String[] selectionArgs = new String[]{Long.toString(dateFrom.getTime()), Long.toString(dateTo.getTime())};
+        String[] selectionArgs = new String[]{Long.toString(dateTo.getTime()),Long.toString(dateFrom.getTime())};
         String[] eventProjection =
                 {
                         CalendarContract.Events._ID,
@@ -88,6 +91,7 @@ public class Repo {
             sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND  ))))
             );
             */
+
             Collections.sort(list);
         }
         return list;

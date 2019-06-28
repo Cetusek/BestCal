@@ -127,4 +127,8 @@ public class UsersEvent implements Comparable{
         }
         return list;
     }
+
+    public DayListItemEvent toDayListItemEvent() {
+        return new DayListItemEvent(dateFrom, getHTML());
+    }
 }

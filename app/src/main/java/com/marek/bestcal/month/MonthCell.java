@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,6 +24,8 @@ public class MonthCell extends LinearLayout {
     private final int HOLIDAY_DAY_COLOR = Color.RED;
     private final int TODAY_BACKGROUND_COLOR = Color.GREEN;
 
+    private MonthCellObserver monthCellObserver;
+
 
     private TextView textViewDayNo;
     private LinearLayout content;
@@ -33,8 +36,9 @@ public class MonthCell extends LinearLayout {
     private ArrayList<TextView> events;
 
 
-    public MonthCell(Context context) {
+    public MonthCell(Context context, MonthCellObserver monthCellObserver) {
         super(context);
+        this.monthCellObserver = monthCellObserver;
         events = new ArrayList<>();
         inflate();
         mapGUI();
@@ -52,6 +56,16 @@ public class MonthCell extends LinearLayout {
             ColorDrawable cd = (ColorDrawable) textViewDayNo.getBackground();
             defaultBackgroundColor = cd.getColor();
         }
+        content.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onContentClick();
+            }
+        });
+    }
+
+    private void onContentClick() {
+        monthCellObserver.onMonthCellClick(cellDate);
     }
 
     public void setDimensions(int width, int height) {
@@ -68,14 +82,16 @@ public class MonthCell extends LinearLayout {
             textViewDayNo.setBackgroundColor(TODAY_BACKGROUND_COLOR);
         }
         textViewDayNo.setText(Integer.toString(dayNo));
+        if (isHoliday) {
+            textViewDayNo.setTextColor(HOLIDAY_DAY_COLOR);
+        }
         if (isInMonth) {
-            textViewDayNo.setTextColor(IN_MONTH_COLOR);
-            if (isHoliday) {
-                textViewDayNo.setTextColor(HOLIDAY_DAY_COLOR);
-            }
+            //textViewDayNo.setTextColor(IN_MONTH_COLOR);
+            textViewDayNo.setAlpha(1.0f);
         }
         else {
-            textViewDayNo.setTextColor(OUT_MONTH_COLOR);
+            //textViewDayNo.setTextColor(OUT_MONTH_COLOR);
+            textViewDayNo.setAlpha(0.3f);
         }
     }
 
@@ -84,7 +100,7 @@ public class MonthCell extends LinearLayout {
         event.setText(eventName);
         event.setTextColor(Color.BLACK);
         event.setMaxLines(1);
-        event.setTextSize(10);
+        event.setTextSize(11);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);;
         params.setMarginStart(2);
         event.setLayoutParams(params);
@@ -103,5 +119,9 @@ public class MonthCell extends LinearLayout {
 
     public Date getCellDate() {
         return cellDate;
+    }
+
+    public interface MonthCellObserver {
+        public void onMonthCellClick(Date cellDate);
     }
 }

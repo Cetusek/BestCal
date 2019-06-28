@@ -1,5 +1,6 @@
 package com.marek.bestcal.month;
 
+import android.app.Dialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MonthActivity extends AppCompatActivity {
+public class MonthActivity extends AppCompatActivity implements MonthCell.MonthCellObserver{
 
 
     GridLayout cellLayout;
@@ -33,14 +34,16 @@ public class MonthActivity extends AppCompatActivity {
     Button nextMonthButton;
 
     TextView monthLabel;
+    SimpleDateFormat monthLabelFormat;
 
-    int displayedYear;
+            int displayedYear;
     int displayedMonth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_month);
+        monthLabelFormat = new SimpleDateFormat("LLLL");
         mapGUI();
         showCurrentMonth();
     }
@@ -49,6 +52,12 @@ public class MonthActivity extends AppCompatActivity {
         cellLayout = (GridLayout) findViewById(R.id.MonthActivityMonthLayout);
 
         monthLabel = (TextView) findViewById(R.id.MonthActivityMonthLabel);
+        monthLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onMonthLabelClick();
+            }
+        });
 
         prevMonthButton = (Button) findViewById(R.id.MonthActivityPrevMonthButton);
         prevMonthButton.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +93,7 @@ public class MonthActivity extends AppCompatActivity {
     private void mapCells() {
         cells = new MonthCell[getMonthCellRows()*cellLayout.getColumnCount()];
         for (byte i = 0; i < cells.length; i++) {
-            cells[i] = new MonthCell(this);
+            cells[i] = new MonthCell(this, this);
             cellLayout.addView(cells[i]);
         }
     }
@@ -179,7 +188,26 @@ public class MonthActivity extends AppCompatActivity {
     private void refreshMonthLabel() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(displayedYear, displayedMonth, 1);
-        monthLabel.setText(calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())+", "+ displayedYear);
+        monthLabel.setText(monthLabelFormat.format(calendar.getTime())+", "+ displayedYear);
+
+        //monthLabel.setText(calendar.getDisplayName(Calendar.MONTH, Calendar, Locale.getDefault())+", "+ displayedYear);
+    }
+
+
+    private List<DayListItemEvent> getEvents(Date dateFrom, Date dateTo, boolean spreadEvents) {
+        Repo repo = new Repo();
+        List<UsersEvent> events = repo.getEvents(this, dateFrom, dateTo);
+        List<DayListItemEvent> eventList = new ArrayList<>();
+        for (UsersEvent repoEvent : events) {
+            if (spreadEvents) {
+                eventList.addAll(repoEvent.toDayListItemEvents());
+            }
+            else {
+                eventList.add(repoEvent.toDayListItemEvent());
+            }
+        }
+        Collections.sort(eventList);
+        return eventList;
     }
 
     private void attachEventsToMonthCells() {
@@ -187,14 +215,8 @@ public class MonthActivity extends AppCompatActivity {
         int dateCellItem;
         int dateEventItem;
         Date dateFrom = cells[0].getCellDate();
-        Date dateTo = cells[cells.length-1].getCellDate();
-        Repo repo = new Repo();
-        List<UsersEvent> events = repo.getEvents(this, dateFrom, dateTo);
-        List<DayListItemEvent> eventList = new ArrayList<>();
-        for (UsersEvent repoEvent : events) {
-            eventList.addAll(repoEvent.toDayListItemEvents());
-        }
-        Collections.sort(eventList);
+        Date dateTo = getEndOfDate(cells[cells.length-1].getCellDate());
+        List<DayListItemEvent> eventList = getEvents(dateFrom, dateTo, true);
         int eventsLeftToAttach = eventList.size();
         int lastAddedEventPos = 0;
         if (eventsLeftToAttach == 0) {
@@ -222,4 +244,22 @@ public class MonthActivity extends AppCompatActivity {
         }
     }
 
+    private void onMonthLabelClick() {
+        showCurrentMonth();
+    }
+
+    private Date getEndOfDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.HOUR, 24);
+        calendar.add(Calendar.SECOND, -1);
+        return calendar.getTime();
+    }
+
+    @Override
+    public void onMonthCellClick(Date cellDate) {
+        DialogCell dialog = new DialogCell(this, cellDate);
+        dialog.deployEvents(getEvents(cellDate, getEndOfDate(cellDate), false));
+        dialog.show();
+    }
 }
