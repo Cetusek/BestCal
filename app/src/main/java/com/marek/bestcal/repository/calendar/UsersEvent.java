@@ -18,12 +18,14 @@ public class UsersEvent implements Comparable{
     private Date dateAndTimeFrom;
     private Date dateAndTimeTo;
     private int isAllDay;
+    private int calendarId;
 
-    public UsersEvent(String title, Date dateAndTimeFrom, int isAllDay, Date dateAndTimeTo) {
+    public UsersEvent(String title, Date dateAndTimeFrom, int isAllDay, Date dateAndTimeTo, int calendarId) {
         this.title = title;
         this.dateAndTimeFrom = dateAndTimeFrom;
         this.dateAndTimeTo = dateAndTimeTo;
         this.isAllDay = isAllDay;
+        this.calendarId = calendarId;
         dateFrom = truncateDate(dateAndTimeFrom);
     }
 
@@ -40,11 +42,12 @@ public class UsersEvent implements Comparable{
 
     @Override
     public String toString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss zzz");
         return "UsersEvent{" +
                 "title='" + title + '\'' +
-                ", dateFrom=" + dateFrom + '\'' +
-                ", dateAndTime=" + dateAndTimeFrom +'\'' +
-                ", dateAndTo=" + dateAndTimeTo +
+                ", dateAndTimeFrom=" + sdf.format(dateAndTimeFrom) +'\'' +
+                ", dateAndTimeTo=" + sdf.format(dateAndTimeTo) +'\'' +
+                ", isAllDay=" + isAllDay +
                 '}';
     }
 
@@ -106,13 +109,16 @@ public class UsersEvent implements Comparable{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String eventLabel = getHTML();
         if (isAllDay == 0) {
-            list.add(new DayListItemEvent(dateFrom, eventLabel));
+            list.add(new DayListItemEvent(dateFrom, eventLabel, calendarId));
             //Log.i("MY_APP", "++++ not all day"+sdf.format(dateFrom)+" - "+eventLabel);
         }
         else {
             Date eventPeriodCurrentDate = (Date) dateFrom.clone();
             //Date eventPeriodLastDate = prevDate(truncateDate(dateAndTimeTo)); //Dla calodniowych zdarzen data konca jest przesunieta od 24 od daty poczatkowej
             Date eventPeriodLastDate = prevDate(dateAndTimeTo); //Dla calodniowych zdarzen data konca jest przesunieta od 24 od daty poczatkowej
+            if (Integer.parseInt(sdf.format(eventPeriodLastDate)) < Integer.parseInt(sdf.format(dateFrom))) {
+                eventPeriodLastDate = dateFrom;
+            }
             //Log.i("MY_APP", "eventLabel = "+eventLabel+" "+sdf.format(dateFrom)+" - "+sdf.format(eventPeriodLastDate));
             while (true) {
                 if (Integer.parseInt(sdf.format(eventPeriodCurrentDate)) > Integer.parseInt(sdf.format(eventPeriodLastDate))) {//(eventPeriodCurrentDate.compareTo(eventPeriodLastDate) >= 0) {
@@ -120,7 +126,7 @@ public class UsersEvent implements Comparable{
                 }
                 else {
                     //Log.i("MY_APP", "++++ "+sdf.format(eventPeriodCurrentDate)+" - "+eventLabel);
-                    list.add(new DayListItemEvent(eventPeriodCurrentDate, eventLabel));
+                    list.add(new DayListItemEvent(eventPeriodCurrentDate, eventLabel, calendarId));
                     eventPeriodCurrentDate = nextDate(eventPeriodCurrentDate);
                 }
             }
@@ -129,6 +135,7 @@ public class UsersEvent implements Comparable{
     }
 
     public DayListItemEvent toDayListItemEvent() {
-        return new DayListItemEvent(dateFrom, getHTML());
+        return new DayListItemEvent(dateFrom, getHTML(), calendarId);
     }
+
 }

@@ -10,6 +10,7 @@ import android.widget.GridLayout;
 import android.widget.TextView;
 
 import com.marek.bestcal.R;
+import com.marek.bestcal.config.Configuration;
 import com.marek.bestcal.main.model.DayListItem;
 import com.marek.bestcal.main.model.DayListItemEvent;
 import com.marek.bestcal.repository.Repo;
@@ -36,16 +37,25 @@ public class MonthActivity extends AppCompatActivity implements MonthCell.MonthC
     TextView monthLabel;
     SimpleDateFormat monthLabelFormat;
 
-            int displayedYear;
+    int displayedYear;
     int displayedMonth;
+
+    private Configuration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_month);
+        updateConfiguration();
         monthLabelFormat = new SimpleDateFormat("LLLL");
+
         mapGUI();
         showCurrentMonth();
+    }
+
+    private void updateConfiguration() {
+        configuration = Configuration.getInstance();
+        configuration.refreshColorInformation(this);
     }
 
     private void mapGUI() {
@@ -195,7 +205,7 @@ public class MonthActivity extends AppCompatActivity implements MonthCell.MonthC
 
 
     private List<DayListItemEvent> getEvents(Date dateFrom, Date dateTo, boolean spreadEvents) {
-        Repo repo = new Repo();
+        Repo repo = Repo.getInstance();
         List<UsersEvent> events = repo.getEvents(this, dateFrom, dateTo);
         List<DayListItemEvent> eventList = new ArrayList<>();
         for (UsersEvent repoEvent : events) {
@@ -228,7 +238,7 @@ public class MonthActivity extends AppCompatActivity implements MonthCell.MonthC
                 DayListItemEvent event = eventList.get(j);
                 dateEventItem = Integer.parseInt(sdf.format(event.getEventDate()));
                 if (dateCellItem == dateEventItem) {
-                    cells[i].addEvent(event.getEventLabel());
+                    cells[i].addEvent(event);
                     lastAddedEventPos = j;
                     eventsLeftToAttach--;
                     if (eventsLeftToAttach == 0) {

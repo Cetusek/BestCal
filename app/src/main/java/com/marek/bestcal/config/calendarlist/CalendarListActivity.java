@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.ListView;
 
 import com.marek.bestcal.R;
+import com.marek.bestcal.config.Configuration;
 
 public class CalendarListActivity extends AppCompatActivity {
 
@@ -15,6 +16,7 @@ public class CalendarListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar_list);
+        Configuration.getInstance().refreshColorInformation(this);
         mapGUI();
         deployAdapter();
     }

@@ -99,7 +99,7 @@ public class DayList {
 
 
     private List<UsersEvent> readEventsFromRepo(Date dateFrom, Date dateTo) {
-        Repo repo = new Repo();
+        Repo repo = Repo.getInstance();
         return repo.getEvents(context, dateFrom, dateTo);
     }
 

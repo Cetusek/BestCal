@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.marek.bestcal.R;
+import com.marek.bestcal.config.Configuration;
+import com.marek.bestcal.main.model.DayListItemEvent;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,11 +37,14 @@ public class MonthCell extends LinearLayout {
 
     private ArrayList<TextView> events;
 
+    private Configuration configuration;
+
 
     public MonthCell(Context context, MonthCellObserver monthCellObserver) {
         super(context);
         this.monthCellObserver = monthCellObserver;
         events = new ArrayList<>();
+        configuration = Configuration.getInstance();
         inflate();
         mapGUI();
     }
@@ -95,13 +100,14 @@ public class MonthCell extends LinearLayout {
         }
     }
 
-    public void addEvent(String eventName) {
+    public void addEvent(DayListItemEvent itemEvent) {
         TextView event = new TextView(getContext());
-        event.setText(eventName);
-        event.setTextColor(Color.BLACK);
+        event.setText(itemEvent.getEventLabel());
+        event.setBackgroundColor(configuration.getEventBackgroundColorForCalendar(itemEvent.getCalendarId()));
+        event.setTextColor(configuration.getEventTextColorForCalendar(itemEvent.getCalendarId()));
         event.setMaxLines(1);
         event.setTextSize(11);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);;
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);;
         params.setMarginStart(2);
         event.setLayoutParams(params);
 

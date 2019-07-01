@@ -15,6 +15,7 @@ import android.util.Log;
 import com.marek.bestcal.repository.calendar.UsersCalendar;
 import com.marek.bestcal.repository.calendar.UsersEvent;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,8 +23,21 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class Repo {
+
+    private static Repo instance;
+
+    private Repo() {
+    }
+
+    public static Repo getInstance() {
+        if (instance == null) {
+            instance = new Repo();
+        }
+        return instance;
+    }
 
 
     public List<UsersCalendar> getCalendars(Context context) {
@@ -46,7 +60,7 @@ public class Repo {
         Cursor cursor = contentResolver.query(uri, eventProjection, selection, selectionArgs, null);
         while (cursor.moveToNext()) {
             UsersCalendar usersCalendar = new UsersCalendar(
-                    cursor.getLong(0),
+                    cursor.getInt(0),
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getString(3),
@@ -54,22 +68,26 @@ public class Repo {
                     cursor.getInt(5)
             );
             list.add(usersCalendar);
-            Log.i("MY_APP", "withAppendedId = "+ ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, cursor.getLong(0)));
         }
         return list;
     }
 
     public List<UsersEvent> getEvents(Context context, Date dateFrom, Date dateTo) {
-        //Log.i("MY_APP", dateFrom.toString()+"  "+dateTo.toString());
+        long eventDateFromUTC;
+        long eventDateFromLocal;
+        long eventDateToUTC;
+        long eventDateToLocal;
+        int isAllDay;
+        Date eventDateFrom;
+        Date eventDateTo;
+        String timeZone;
         ArrayList<UsersEvent> list = new ArrayList<>();
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             return list;
         }
         ContentResolver contentResolver = context.getContentResolver();
         Uri uri = CalendarContract.Events.CONTENT_URI;
-        //String selection = CalendarContract.Events.DTSTART + " >= ? OR " + CalendarContract.Events.DTEND + " <= ? ";
         String selection = CalendarContract.Events.DTSTART + " <= ? AND " + CalendarContract.Events.DTEND + " >= ?";
-        //String[] selectionArgs = new String[]{Long.toString(dateFrom.getTime()), Long.toString(dateTo.getTime())};
         String[] selectionArgs = new String[]{Long.toString(dateTo.getTime()),Long.toString(dateFrom.getTime())};
         String[] eventProjection =
                 {
@@ -78,14 +96,36 @@ public class Repo {
                         CalendarContract.Events.DTSTART,
                         CalendarContract.Events.ALL_DAY,
                         CalendarContract.Events.DTEND,
-                        CalendarContract.Events.CALENDAR_ID
+                        CalendarContract.Events.CALENDAR_ID,
+                        CalendarContract.Events.EVENT_TIMEZONE
                 };
         Cursor cursor = contentResolver.query(uri, eventProjection, selection, selectionArgs, null);
         while (cursor.moveToNext()) {
+            timeZone = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.EVENT_TIMEZONE));
+            isAllDay = cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.ALL_DAY));
+            if (timeZone.equals("UTC")) {
+                eventDateFromUTC = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART));
+                eventDateFromLocal = eventDateFromUTC - TimeZone.getDefault().getOffset(eventDateFromUTC);
+                eventDateToUTC = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND));
+                eventDateToLocal = eventDateToUTC - TimeZone.getDefault().getOffset(eventDateToUTC);
+            }
+            else {
+                eventDateFromLocal = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART));
+                eventDateToLocal = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND));
+            }
+            if (isAllDay == 1 && eventDateFromLocal == eventDateToLocal) {
+                eventDateToLocal = eventDateFromLocal + 24*60*60*1000;
+            }
+            if (isAllDay == 1) {
+                eventDateToLocal = eventDateToLocal - 1000;
+            }
+            eventDateFrom = new Date(eventDateFromLocal);
+            eventDateTo = new Date(eventDateToLocal);
             UsersEvent usersEvent = new UsersEvent(cursor.getString(cursor.getColumnIndex(CalendarContract.Events.TITLE)),
-                    new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART))),
-                    cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.ALL_DAY)),
-                    new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND)))
+                    eventDateFrom,
+                    isAllDay,
+                    eventDateTo,
+                    cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.CALENDAR_ID))
                     );
             list.add(usersEvent);
 
@@ -96,6 +136,8 @@ public class Repo {
             sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND  ))))
             );
             */
+
+            //Log.i("MY_APP", "Event: "+usersEvent+" TimeZone: "+cursor.getString(6));
 
             Collections.sort(list);
         }

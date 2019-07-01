@@ -9,10 +9,12 @@ public class DayListItemEvent implements Comparable<DayListItemEvent> {
 
     private Date eventDate;
     private String eventLabel;
+    private int calendarId;
 
-    public DayListItemEvent(Date eventDate, String eventLabel) {
+    public DayListItemEvent(Date eventDate, String eventLabel, int calendarId) {
         this.eventDate = eventDate;
         this.eventLabel = eventLabel;
+        this.calendarId = calendarId;
     }
 
     public Date getEventDate() {
@@ -23,6 +25,10 @@ public class DayListItemEvent implements Comparable<DayListItemEvent> {
         return eventLabel;
     }
 
+
+    public int getCalendarId() {
+        return calendarId;
+    }
 
     @Override
     public int compareTo(@NonNull DayListItemEvent another) {

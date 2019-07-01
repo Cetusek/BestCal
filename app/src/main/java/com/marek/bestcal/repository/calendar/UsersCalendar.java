@@ -2,14 +2,14 @@ package com.marek.bestcal.repository.calendar;
 
 public class UsersCalendar {
 
-    private long id;
+    private int id;
     private String name;
     private String displayedName;
     private String accountName;
     private String ownerAccount;
     private int color;
 
-    public UsersCalendar(long id, String name, String displayedName, String accountName, String ownerAccount, int color) {
+    public UsersCalendar(int id, String name, String displayedName, String accountName, String ownerAccount, int color) {
         this.id = id;
         this.name = name;
         this.displayedName = displayedName;
@@ -23,7 +23,7 @@ public class UsersCalendar {
         return displayedName;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

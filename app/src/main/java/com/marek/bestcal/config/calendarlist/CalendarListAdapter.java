@@ -14,6 +14,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.marek.bestcal.R;
+import com.marek.bestcal.config.Configuration;
 import com.marek.bestcal.repository.Repo;
 import com.marek.bestcal.repository.calendar.UsersCalendar;
 
@@ -24,8 +25,12 @@ import java.util.List;
 public class CalendarListAdapter extends ArrayAdapter<UsersCalendar> {
 
 
+    private Configuration configuration;
+
+
     public CalendarListAdapter(@NonNull Context context, @LayoutRes int resource) {
         super(context, resource);
+        configuration = Configuration.getInstance();
         populateList();
     }
 
@@ -38,15 +43,16 @@ public class CalendarListAdapter extends ArrayAdapter<UsersCalendar> {
         Switch calendarSwitch = (Switch) layout.findViewById(R.id.CalendarListRowSwitch);
         TextView displayedName = (TextView) layout.findViewById(R.id.CalendarListRowDisplayedName);
         displayedName.setText(listItem.getDisplayedName());
+        displayedName.setTextColor(configuration.getEventTextColorForCalendar(listItem.getId()));
         TextView name = (TextView) layout.findViewById(R.id.CalendarListRowAccountName);
         name.setText(listItem.getAccountName());
         LinearLayout content = (LinearLayout) layout.findViewById(R.id.CalendarListRowContent);
-        content.setBackgroundColor(listItem.getColor());
+        content.setBackgroundColor(configuration.getEventBackgroundColorForCalendar(listItem.getId()));
         return layout;
     }
 
     private void populateList() {
-        Repo repo = new Repo();
+        Repo repo = Repo.getInstance();
         addAll(repo.getCalendars(getContext()));
     }
 
