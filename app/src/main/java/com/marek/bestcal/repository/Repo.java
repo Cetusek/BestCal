@@ -2,6 +2,7 @@ package com.marek.bestcal.repository;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -39,7 +40,8 @@ public class Repo {
                 CalendarContract.Calendars.NAME,
                 CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
                 CalendarContract.Calendars.ACCOUNT_NAME,
-                CalendarContract.Calendars.OWNER_ACCOUNT
+                CalendarContract.Calendars.OWNER_ACCOUNT,
+                CalendarContract.Calendars.CALENDAR_COLOR
         };
         Cursor cursor = contentResolver.query(uri, eventProjection, selection, selectionArgs, null);
         while (cursor.moveToNext()) {
@@ -48,9 +50,11 @@ public class Repo {
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getString(3),
-                    cursor.getString(4)
+                    cursor.getString(4),
+                    cursor.getInt(5)
             );
             list.add(usersCalendar);
+            Log.i("MY_APP", "withAppendedId = "+ ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, cursor.getLong(0)));
         }
         return list;
     }
@@ -73,7 +77,8 @@ public class Repo {
                         CalendarContract.Events.TITLE,
                         CalendarContract.Events.DTSTART,
                         CalendarContract.Events.ALL_DAY,
-                        CalendarContract.Events.DTEND
+                        CalendarContract.Events.DTEND,
+                        CalendarContract.Events.CALENDAR_ID
                 };
         Cursor cursor = contentResolver.query(uri, eventProjection, selection, selectionArgs, null);
         while (cursor.moveToNext()) {

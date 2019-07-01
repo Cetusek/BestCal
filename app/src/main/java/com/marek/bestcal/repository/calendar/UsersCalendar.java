@@ -7,13 +7,15 @@ public class UsersCalendar {
     private String displayedName;
     private String accountName;
     private String ownerAccount;
+    private int color;
 
-    public UsersCalendar(long id, String name, String displayedName, String accountName, String ownerAccount) {
+    public UsersCalendar(long id, String name, String displayedName, String accountName, String ownerAccount, int color) {
         this.id = id;
         this.name = name;
         this.displayedName = displayedName;
         this.accountName = accountName;
         this.ownerAccount = ownerAccount;
+        this.color = color;
     }
 
 
@@ -35,5 +37,9 @@ public class UsersCalendar {
 
     public String getOwnerAccount() {
         return ownerAccount;
+    }
+
+    public int getColor() {
+        return color;
     }
 }

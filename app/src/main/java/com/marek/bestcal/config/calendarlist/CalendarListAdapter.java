@@ -21,7 +21,7 @@ import org.w3c.dom.Text;
 
 import java.util.List;
 
-public class CalendarListAdapter extends ArrayAdapter<CalendarListItem> {
+public class CalendarListAdapter extends ArrayAdapter<UsersCalendar> {
 
 
     public CalendarListAdapter(@NonNull Context context, @LayoutRes int resource) {
@@ -32,7 +32,7 @@ public class CalendarListAdapter extends ArrayAdapter<CalendarListItem> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        CalendarListItem listItem = getItem(position);
+        UsersCalendar listItem = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.activity_calendar_list_row, parent, false);
         Switch calendarSwitch = (Switch) layout.findViewById(R.id.CalendarListRowSwitch);
@@ -40,16 +40,14 @@ public class CalendarListAdapter extends ArrayAdapter<CalendarListItem> {
         displayedName.setText(listItem.getDisplayedName());
         TextView name = (TextView) layout.findViewById(R.id.CalendarListRowAccountName);
         name.setText(listItem.getAccountName());
+        LinearLayout content = (LinearLayout) layout.findViewById(R.id.CalendarListRowContent);
+        content.setBackgroundColor(listItem.getColor());
         return layout;
     }
 
     private void populateList() {
         Repo repo = new Repo();
-        List<UsersCalendar> calendars = repo.getCalendars(getContext());
-        for (UsersCalendar calendar:calendars
-             ) {
-            add(new CalendarListItem(calendar));
-        }
+        addAll(repo.getCalendars(getContext()));
     }
 
 }
