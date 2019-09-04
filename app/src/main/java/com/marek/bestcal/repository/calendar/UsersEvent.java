@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.marek.bestcal.main.model.DayListItemEvent;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -104,7 +105,7 @@ public class UsersEvent implements Comparable{
     }
 
 
-    public ArrayList<DayListItemEvent> toDayListItemEvents() {
+    public ArrayList<DayListItemEvent> toDayListItemEvents____Old() {
         ArrayList<DayListItemEvent> list = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String eventLabel = getHTML();
@@ -129,6 +130,32 @@ public class UsersEvent implements Comparable{
                     list.add(new DayListItemEvent(eventPeriodCurrentDate, eventLabel, calendarId));
                     eventPeriodCurrentDate = nextDate(eventPeriodCurrentDate);
                 }
+            }
+        }
+        return list;
+    }
+
+    public ArrayList<DayListItemEvent> toDayListItemEvents() {
+        ArrayList<DayListItemEvent> list = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        int intDateFrom;
+        int intDateTo;
+        Calendar calendar = Calendar.getInstance();
+        String eventLabel = getHTML();
+        if (isAllDay == 0) {
+            list.add(new DayListItemEvent(dateFrom, eventLabel, calendarId));
+        }
+        else {
+            intDateFrom = Integer.parseInt(sdf.format(dateFrom));
+            intDateTo = Integer.parseInt(sdf.format(dateAndTimeTo));
+            try {
+                calendar.setTime(sdf.parse(Integer.toString(intDateFrom)));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            for (int i = intDateFrom; i <= intDateTo; i++) {
+                list.add(new DayListItemEvent(calendar.getTime(), eventLabel, calendarId));
+                calendar.add(Calendar.DATE, 1);
             }
         }
         return list;

@@ -129,13 +129,16 @@ public class Repo {
                     );
             list.add(usersEvent);
 
+
             /*
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Log.i("MY_APP", "usersEvent = "+cursor.getString(cursor.getColumnIndex(CalendarContract.Events.TITLE))+" "+
             sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART)))) + " "+
             sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND  ))))
             );
+            Log.i("MY_APP", usersEvent.toString());
             */
+
 
             //Log.i("MY_APP", "Event: "+usersEvent+" TimeZone: "+cursor.getString(6));
 
