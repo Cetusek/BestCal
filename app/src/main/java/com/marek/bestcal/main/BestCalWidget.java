@@ -1,6 +1,5 @@
 package com.marek.bestcal.main;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -9,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.PowerManager;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -18,6 +16,7 @@ import com.marek.bestcal.config.calendarlist.CalendarListActivity;
 import com.marek.bestcal.crash.CustomExceptionHandler;
 import com.marek.bestcal.main.model.BestCalUpdater;
 import com.marek.bestcal.main.model.DayList;
+import com.marek.bestcal.menu.MenuActivity;
 import com.marek.bestcal.month.MonthActivity;
 
 public class BestCalWidget extends AppWidgetProvider {
@@ -54,7 +53,7 @@ public class BestCalWidget extends AppWidgetProvider {
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         remoteViews.setRemoteAdapter(appWidgetId, R.id.WidgetListView, intent);
-        mapSettingsButton(context, remoteViews);
+        mapMenuButton(context, remoteViews);
         mapRefreshButton(context, remoteViews);
         mapMonthCalendarButton(context, remoteViews);
         return remoteViews;
@@ -75,10 +74,17 @@ public class BestCalWidget extends AppWidgetProvider {
 
 
     private void mapSettingsButton(Context context, RemoteViews remoteViews) {
-        remoteViews.setInt(R.id.WidgetButtonSettings, "setImageResource", R.drawable.settings);
+        remoteViews.setInt(R.id.WidgetButtonMenu, "setImageResource", R.drawable.settings);
         Intent intent = new Intent(context, CalendarListActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonSettings, pendingIntent);
+        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonMenu, pendingIntent);
+    }
+
+    private void mapMenuButton(Context context, RemoteViews remoteViews) {
+        remoteViews.setInt(R.id.WidgetButtonMenu, "setImageResource", R.drawable.menu);
+        Intent intent = new Intent(context, MenuActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        remoteViews.setOnClickPendingIntent(R.id.WidgetButtonMenu, pendingIntent);
     }
 
     private void mapRefreshButton(Context context, RemoteViews remoteViews) {
@@ -158,6 +164,9 @@ public class BestCalWidget extends AppWidgetProvider {
         }
         super.onReceive(context, intent);
     }
+
+
+
 
 }
 

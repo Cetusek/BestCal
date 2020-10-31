@@ -3,6 +3,7 @@ package com.marek.bestcal.repository;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -11,7 +12,9 @@ import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.marek.bestcal.R;
 import com.marek.bestcal.repository.calendar.UsersCalendar;
 import com.marek.bestcal.repository.calendar.UsersEvent;
 
@@ -88,7 +91,7 @@ public class Repo {
         ContentResolver contentResolver = context.getContentResolver();
         Uri uri = CalendarContract.Events.CONTENT_URI;
         String selection = CalendarContract.Events.DTSTART + " <= ? AND " + CalendarContract.Events.DTEND + " >= ?";
-        String[] selectionArgs = new String[]{Long.toString(dateTo.getTime()),Long.toString(dateFrom.getTime())};
+        String[] selectionArgs = new String[]{Long.toString(dateTo.getTime()), Long.toString(dateFrom.getTime())};
         String[] eventProjection =
                 {
                         CalendarContract.Events._ID,
@@ -108,13 +111,12 @@ public class Repo {
                 eventDateFromLocal = eventDateFromUTC - TimeZone.getDefault().getOffset(eventDateFromUTC);
                 eventDateToUTC = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND));
                 eventDateToLocal = eventDateToUTC - TimeZone.getDefault().getOffset(eventDateToUTC);
-            }
-            else {
+            } else {
                 eventDateFromLocal = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART));
                 eventDateToLocal = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND));
             }
             if (isAllDay == 1 && eventDateFromLocal == eventDateToLocal) {
-                eventDateToLocal = eventDateFromLocal + 24*60*60*1000;
+                eventDateToLocal = eventDateFromLocal + 24 * 60 * 60 * 1000;
             }
             if (isAllDay == 1) {
                 eventDateToLocal = eventDateToLocal - 1000;
@@ -126,7 +128,7 @@ public class Repo {
                     isAllDay,
                     eventDateTo,
                     cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.CALENDAR_ID))
-                    );
+            );
             list.add(usersEvent);
 
 
@@ -147,6 +149,32 @@ public class Repo {
         return list;
     }
 
-
+    public boolean insertAnniversaries(Context context, String calendarId, Date dateFrom, String description, String sign) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, R.string.no_write_perimission_granted, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        Calendar anniversaryDate = Calendar.getInstance();
+        ContentResolver contentResolver = context.getContentResolver();
+        String title;
+        for (int i = 0; i < 3; i++) {
+            if (i == 0) {
+                title = sign + " " + description;
+            }
+            else {
+                title = sign + " ["+i+"] " + description;
+            }
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(CalendarContract.Events.DTSTART, anniversaryDate.getTimeInMillis());
+            contentValues.put(CalendarContract.Events.DTEND, anniversaryDate.getTimeInMillis());
+            contentValues.put(CalendarContract.Events.TITLE, title);
+            contentValues.put(CalendarContract.Events.ALL_DAY, 1);
+            contentValues.put(CalendarContract.Events.CALENDAR_ID, calendarId);
+            contentValues.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
+            Uri uri = contentResolver.insert(CalendarContract.Events.CONTENT_URI, contentValues);
+            anniversaryDate.add(Calendar.YEAR, 1);
+        }
+        return true;
+    }
 
 }

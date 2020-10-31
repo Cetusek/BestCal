@@ -43,4 +43,10 @@ public class DayListItem {
         return sb.toString();
     }
 
+    public void clearEvents() {
+        if (events != null) {
+            events.clear();
+        }
+    }
+
 }

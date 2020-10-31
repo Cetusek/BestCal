@@ -71,6 +71,7 @@ public class DayList {
             return;
         }
         for (DayListItem day : list) {
+            day.clearEvents();
             dateDayItem = Integer.parseInt(sdf.format(day.date));
             for (int i = lastAddedEventPos; i < events.size(); i++) {
                 DayListItemEvent event = events.get(i);

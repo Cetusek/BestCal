@@ -3,7 +3,9 @@
     package="com.marek.bestcal">
 
     <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <application
         android:allowBackup="true"
@@ -11,6 +13,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".anniversary.AnniversaryActivity"></activity>
+
         <receiver android:name=".main.BestCalWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -20,8 +24,9 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/best_cal_widget_info" />
         </receiver>
-
-        <receiver android:process=":remote" android:name=".main.model.BestCalUpdater"></receiver>
+        <receiver
+            android:name=".main.model.BestCalUpdater"
+            android:process=":remote" />
 
         <activity android:name=".main.BestCalWidgetConfigureActivity">
             <intent-filter>
@@ -34,7 +39,8 @@
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <activity android:name=".config.calendarlist.CalendarListActivity" />
-        <activity android:name=".month.MonthActivity"></activity>
+        <activity android:name=".month.MonthActivity" />
+        <activity android:name=".menu.MenuActivity" />
     </application>
 
 </manifest>

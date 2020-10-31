@@ -3,4 +3,17 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="calendar">Calendar</string>
+    <string name="add_anniversaries">Add anniversaries"</string>
+    <string name="calendar_is_not_chosen">Calendar is not chosen</string>
+    <string name="birth">Birth</string>
+    <string name="death">Death</string>
+    <string name="wedding">Wedding</string>
+    <string name="anniversary_type">Anniversary type</string>
+    <string name="date_from">Date from</string>
+    <string name="description">Description</string>
+    <string name="description_is_required">Description is required</string>
+    <string name="no_read_perimission_granted">No read permission granted</string>
+    <string name="no_write_perimission_granted">No write permission granted</string>
+    <string name="anniversaries_were_added">The anniversaries were added</string>
 </resources>

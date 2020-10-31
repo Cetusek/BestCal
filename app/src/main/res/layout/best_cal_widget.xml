@@ -11,12 +11,12 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/WidgetButtonSettings"
+            android:id="@+id/WidgetButtonMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@null"
-            app:srcCompat="@drawable/settings" />
+            app:srcCompat="@drawable/menu" />
 
         <ImageButton
             android:id="@+id/WidgetButtonMonth"
